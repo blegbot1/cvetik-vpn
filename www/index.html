@@ -45,7 +45,7 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
 .main{padding-top:56px;height:100vh;display:flex;flex-direction:column;align-items:center;position:relative}
 
 /* Connect area */
-.connect{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;position:relative;padding:20px;transition:all 0.4s}
+.connect{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;width:100%;position:relative;padding:20px;padding-top:6vh;transition:all 0.4s}
 .connect.shifted{transform:translateY(-40px)}
 
 /* Speed lines */
@@ -55,15 +55,15 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
 @keyframes swhoosh{0%{transform:translate(-50%,-100%) rotate(var(--r)) scaleY(0);opacity:0}30%{opacity:1}100%{transform:translate(-50%,-100%) rotate(var(--r)) scaleY(1.5);opacity:0}}
 
 /* Rings */
-.ringwrap{position:relative;width:190px;height:190px;display:flex;align-items:center;justify-content:center}
+.ringwrap{position:relative;width:165px;height:165px;display:flex;align-items:center;justify-content:center}
 .ring{position:absolute;border-radius:50%;border:2px solid transparent;animation:ringPulse 3s cubic-bezier(0.4,0,0.2,1) infinite}
-.r1{width:190px;height:190px;border-color:rgba(230,57,70,0.25);animation-delay:0s}
-.r2{width:160px;height:160px;border-color:rgba(69,123,157,0.25);animation-delay:0.6s}
-.r3{width:130px;height:130px;border-color:rgba(230,57,70,0.15);animation-delay:1.2s}
+.r1{width:165px;height:165px;border-color:rgba(230,57,70,0.25);animation-delay:0s}
+.r2{width:140px;height:140px;border-color:rgba(69,123,157,0.25);animation-delay:0.6s}
+.r3{width:115px;height:115px;border-color:rgba(230,57,70,0.15);animation-delay:1.2s}
 @keyframes ringPulse{0%{transform:scale(1);opacity:1}100%{transform:scale(1.4);opacity:0}}
 
 /* Main button */
-.cbtn{width:110px;height:110px;border-radius:50%;border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;position:relative;z-index:10;background:linear-gradient(135deg,#e63946 0%,#457b9d 100%);box-shadow:0 8px 32px rgba(230,57,70,0.35),0 0 0 1px rgba(255,255,255,0.1),inset 0 1px 0 rgba(255,255,255,0.2);transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;overflow:hidden}
+.cbtn{width:95px;height:95px;border-radius:50%;border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;position:relative;z-index:10;background:linear-gradient(135deg,#e63946 0%,#457b9d 100%);box-shadow:0 8px 32px rgba(230,57,70,0.35),0 0 0 1px rgba(255,255,255,0.1),inset 0 1px 0 rgba(255,255,255,0.2);transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;overflow:hidden}
 .cbtn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);opacity:0;transition:opacity 0.3s}
 .cbtn:active{transform:scale(0.92)}
 .cbtn:active::before{opacity:1}
@@ -88,7 +88,7 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
 .slab{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
 
 /* Bottom sheet */
-.sheet{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(15,21,53,0.97),rgba(10,14,39,0.99));backdrop-filter:blur(40px);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,255,255,0.08);z-index:50;box-shadow:0 -10px 40px rgba(0,0,0,0.5);transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);max-height:45vh;display:flex;flex-direction:column;transform:translateY(0)}
+.sheet{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(15,21,53,0.97),rgba(10,14,39,0.99));backdrop-filter:blur(40px);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,255,255,0.08);z-index:50;box-shadow:0 -10px 40px rgba(0,0,0,0.5);transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);max-height:38vh;display:flex;flex-direction:column;transform:translateY(0)}
 .sheet.down{transform:translateY(calc(100% - 70px))}
 .shandle{width:40px;height:5px;background:rgba(255,255,255,0.2);border-radius:3px;margin:10px auto;cursor:pointer;transition:all 0.2s}
 .shandle:active{background:rgba(255,255,255,0.35);width:50px}
@@ -113,7 +113,7 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
 @keyframes pulsePing{0%,100%{opacity:1}50%{opacity:0.5}}
 
 /* FAB */
-.fab{position:fixed;bottom:calc(45vh + 24px);right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e63946,#457b9d);border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 6px 24px rgba(230,57,70,0.4);z-index:60;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;justify-content:center;font-weight:300}
+.fab{position:fixed;bottom:calc(38vh + 20px);right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e63946,#457b9d);border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 6px 24px rgba(230,57,70,0.4);z-index:60;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;justify-content:center;font-weight:300}
 .fab:active{transform:scale(0.88) rotate(90deg)}
 .fab.hide{transform:scale(0) rotate(180deg);opacity:0}
 
@@ -408,7 +408,7 @@ function sel(i){
 }
 
 // === CONNECT ===
-function toggleConnect(){
+async function toggleConnect(){
   const btn=document.getElementById('cbtn');
   const icon=document.getElementById('cicon');
   const lbl=document.getElementById('clabel');
@@ -417,28 +417,33 @@ function toggleConnect(){
   const su=document.getElementById('ssub');
   const stats=document.getElementById('stats');
   const speed=document.getElementById('speed');
-  connected=!connected;
-  if(connected){
-    btn.classList.add('on');
-    icon.textContent='🔒';
-    lbl.textContent='ВЫКЛ';
-    dot.classList.add('on');
-    st.textContent='ВКЛЮЧЕНО';
-    su.textContent=configs[active].n+' • '+configs[active].e;
-    stats.classList.add('on');
-    speed.classList.add('on');
-    startSim();
-    toast('✅ Подключено к '+configs[active].n);
+  const cfg=configs[active];
+
+  if(!connected){
+    toast('⏳ Запрос разрешения VPN...');
+    try{
+      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
+        const res=await window.Capacitor.Plugins.CvetikVpn.connect({endpoint:cfg.e,name:cfg.n});
+        if(res.status==='connected'){
+          connected=true;btn.classList.add('on');icon.textContent='⚡';lbl.textContent='ВКЛ';
+          dot.classList.add('on');st.textContent='Подключено';su.textContent=cfg.n+' • '+cfg.e;
+          stats.classList.add('on');speed.classList.add('on');startRealStats();
+          toast('✅ Подключено к '+cfg.n);
+        }else{toast('❌ Ошибка: '+(res.error||'unknown'));}
+      }else{
+        connected=true;btn.classList.add('on');icon.textContent='⚡';lbl.textContent='ВКЛ';
+        dot.classList.add('on');st.textContent='Подключено (демо)';su.textContent=cfg.n+' • '+cfg.e;
+        stats.classList.add('on');speed.classList.add('on');startSim();
+        toast('✅ Демо-режим: '+cfg.n);
+      }
+    }catch(e){toast('❌ '+e.message);}
   }else{
-    btn.classList.remove('on');
-    icon.textContent='⚡';
-    lbl.textContent='ВКЛ';
-    dot.classList.remove('on');
-    st.textContent='ВЫКЛЮЧЕНО';
-    su.textContent='Нажми чтобы подключиться';
-    stats.classList.remove('on');
-    speed.classList.remove('on');
-    stopSim();
+    try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
+      await window.Capacitor.Plugins.CvetikVpn.disconnect();
+    }}catch(e){}
+    connected=false;btn.classList.remove('on');icon.textContent='⚡';lbl.textContent='ВКЛ';
+    dot.classList.remove('on');st.textContent='Отключено';su.textContent='Нажмите кнопку для подключения';
+    stats.classList.remove('on');speed.classList.remove('on');stopSim();stopRealStats();
     toast('❌ Отключено');
   }
 }
@@ -575,6 +580,24 @@ if('serviceWorker' in navigator){
   `)).catch(()=>{});
 }
 
+
+// === REAL STATS ===
+let statsInterval=null;
+function startRealStats(){
+  if(statsInterval)clearInterval(statsInterval);
+  statsInterval=setInterval(async()=>{
+    try{
+      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
+        const res=await window.Capacitor.Plugins.CvetikVpn.getStats();
+        document.getElementById('down').textContent=fmtB(res.rx);
+        document.getElementById('up').textContent=fmtB(res.tx);
+        document.getElementById('ping').textContent=(configs[active].p||'--')+' мс';
+      }
+    }catch(e){}
+  },1000);
+}
+function stopRealStats(){if(statsInterval){clearInterval(statsInterval);statsInterval=null;}}
+function fmtB(b){if(!b||b<0)return'0.0';const mb=b/(1024*1024);if(mb<1)return(b/1024).toFixed(1)+' КБ';return mb.toFixed(1)+' МБ';}
 init();
 </script>
 </body>
