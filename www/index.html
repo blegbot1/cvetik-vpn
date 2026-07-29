@@ -31,6 +31,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .ping-good{background:rgba(46,204,113,0.15);color:#2ecc71}
 .ping-mid{background:rgba(241,196,15,0.15);color:#f1c40f}
 .ping-bad{background:rgba(230,57,70,0.15);color:#e63946}
+.ping-load{background:rgba(255,255,255,0.05);color:#8b949e;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 
 .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 .status{text-align:center;margin-bottom:30px}
@@ -51,19 +53,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .stat-val{font-size:16px;font-weight:800;background:linear-gradient(90deg,#e63946,#457b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .stat-lab{font-size:10px;color:#8b949e;margin-top:2px;text-transform:uppercase}
 
-.add-btn{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#e63946;border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(230,57,70,0.4);z-index:50}
-.add-btn:active{transform:scale(0.9)}
-
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
-.modal.on{display:flex}
-.modal-box{background:#161b22;border:1px solid #30363d;border-radius:16px;width:100%;max-width:360px;padding:20px}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
-.modal-input{width:100%;padding:12px 14px;background:#21262d;border:1px solid #30363d;border-radius:10px;color:#fff;font-size:14px;margin-bottom:10px}
-.modal-input:focus{border-color:#e63946;outline:none}
-.modal-btn{width:100%;padding:14px;background:linear-gradient(135deg,#e63946,#457b9d);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
-.modal-btn:active{transform:scale(0.97)}
-
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:#161b22;border:1px solid #30363d;padding:12px 24px;border-radius:24px;font-size:14px;z-index:300;opacity:0;transition:all 0.4s;white-space:nowrap}
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(60px);background:#161b22;border:1px solid #30363d;padding:12px 24px;border-radius:24px;font-size:14px;z-index:300;opacity:0;transition:all 0.4s;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
@@ -102,22 +92,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
-<button class="add-btn" onclick="showAdd()">+</button>
-
-<div class="modal" id="addModal" onclick="if(event.target===this)hideAdd()">
-  <div class="modal-box">
-    <div class="modal-title">Добавить сервер</div>
-    <input class="modal-input" id="addName" placeholder="Название" type="text">
-    <input class="modal-input" id="addAddr" placeholder="IP:порт (например: 1.2.3.4:4500)" type="text">
-    <input class="modal-input" id="addFlag" placeholder="Флаг (emoji, например: 🇩🇪)" type="text">
-    <button class="modal-btn" onclick="addServer()">Добавить</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-let servers = JSON.parse(localStorage.getItem('cvetik_servers')) || [
+let servers = [
   {n:"Пермь-2",e:"engage.cloudflareclient.com:4500",f:"🇷🇺",p:0},
   {n:"Германия",e:"de.tribukvy.ltd:4500",f:"🇩🇪",p:0},
   {n:"Нидерланды",e:"engage.cloudflareclient.com:4500",f:"🇳🇱",p:0},
@@ -128,12 +106,12 @@ let servers = JSON.parse(localStorage.getItem('cvetik_servers')) || [
 let active = parseInt(localStorage.getItem('cvetik_active')) || 0;
 let connected = false;
 
-function save(){localStorage.setItem('cvetik_servers',JSON.stringify(servers));localStorage.setItem('cvetik_active',active);}
+function save(){localStorage.setItem('cvetik_active',active);}
 
 function render(){
   document.getElementById('serverList').innerHTML = servers.map((s,i)=>{
     const on = i===active ? ' on' : '';
-    const pc = s.p===0 ? '' : (s.p<100 ? 'ping-good' : (s.p<300 ? 'ping-mid' : 'ping-bad'));
+    const pc = s.p===0 ? 'ping-load' : (s.p<100 ? 'ping-good' : (s.p<300 ? 'ping-mid' : 'ping-bad'));
     const pt = s.p===0 ? '...' : s.p+' мс';
     return `<div class="server-item${on}" onclick="sel(${i})"><div class="server-flag">${s.f}</div><div class="server-info"><div class="server-name">${s.n}</div><div class="server-addr">${s.e}</div></div><div class="server-ping ${pc}">${pt}</div></div>`;
   }).join('');
@@ -146,22 +124,22 @@ function sel(i){
 }
 
 function toggleServers(){document.getElementById('serverPanel').classList.toggle('on');}
-function showAdd(){document.getElementById('addModal').classList.add('on');}
-function hideAdd(){document.getElementById('addModal').classList.remove('on');}
-
-function addServer(){
-  const n=document.getElementById('addName').value.trim(),e=document.getElementById('addAddr').value.trim(),f=document.getElementById('addFlag').value.trim()||'📡';
-  if(!n||!e){toast('❌ Заполни поля');return;}
-  servers.push({n,e,f,p:0});save();render();hideAdd();
-  document.getElementById('addName').value='';document.getElementById('addAddr').value='';document.getElementById('addFlag').value='';
-  toast('✅ Добавлен');
-}
 
 async function pingAll(){
   for(let i=0;i<servers.length;i++){
-    const t0=Date.now();
-    try{await fetch('http://'+servers[i].e.split(':')[0],{mode:'no-cors',signal:AbortSignal.timeout(3000)});}catch(e){}
-    servers[i].p=Date.now()-t0;render();
+    servers[i].p=0;render();
+    try{
+      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
+        const res=await window.Capacitor.Plugins.CvetikVpn.ping({host:servers[i].e.split(':')[0]});
+        servers[i].p=res.ms||999;
+      }else{
+        // Fallback for web
+        const t0=Date.now();
+        try{await fetch('http://'+servers[i].e.split(':')[0],{mode:'no-cors',signal:AbortSignal.timeout(3000)});}catch(e){}
+        servers[i].p=Date.now()-t0;
+      }
+    }catch(e){servers[i].p=999;}
+    render();
   }
 }
 
@@ -170,24 +148,35 @@ async function toggleConnect(){
   const dot=document.getElementById('statusDot'),title=document.getElementById('statusTitle'),sub=document.getElementById('statusSub');
   const stats=document.getElementById('stats');const s=servers[active];
   if(!connected){
-    toast('⏳ Подключение...');
+    toast('⏳ Запрос разрешения VPN...');
     try{
       if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
         const res=await window.Capacitor.Plugins.CvetikVpn.connect({endpoint:s.e,name:s.n});
-        if(res.status==='connected'){connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';dot.classList.add('on');title.textContent='Подключено';sub.textContent=s.n+' • '+s.e;stats.classList.add('on');startReal();toast('✅ '+s.n);}
-        else{toast('❌ '+ (res.error||'err'));}
-      }else{connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';dot.classList.add('on');title.textContent='Демо';sub.textContent=s.n+' • '+s.e;stats.classList.add('on');startSim();toast('✅ Демо: '+s.n);}
+        if(res.status==='connected'){
+          connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';
+          dot.classList.add('on');title.textContent='Подключено';sub.textContent=s.n+' • '+s.e;
+          stats.classList.add('on');startReal();toast('✅ '+s.n);
+        }else if(res.status==='permission_required'){
+          toast('🔒 Разрешите VPN в настройках');
+        }else{toast('❌ '+ (res.error||'err'));}
+      }else{
+        connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';
+        dot.classList.add('on');title.textContent='Демо';sub.textContent=s.n+' • '+s.e;
+        stats.classList.add('on');startSim();toast('✅ Демо: '+s.n);
+      }
     }catch(e){toast('❌ '+e.message);}
   }else{
     try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn)await window.Capacitor.Plugins.CvetikVpn.disconnect();}catch(e){}
-    connected=false;btn.classList.remove('on');icon.textContent='⚡';label.textContent='ВКЛ';dot.classList.remove('on');title.textContent='Отключено';sub.textContent='Выберите сервер';stats.classList.remove('on');stopSim();stopReal();toast('❌ Отключено');
+    connected=false;btn.classList.remove('on');icon.textContent='⚡';label.textContent='ВКЛ';
+    dot.classList.remove('on');title.textContent='Отключено';sub.textContent='Выберите сервер';
+    stats.classList.remove('on');stopSim();stopReal();toast('❌ Отключено');
   }
 }
 
 let simI,realI;
-function startSim(){if(simI)clearInterval(simI);simI=setInterval(()=>{document.getElementById('downVal').textContent=(Math.random()*5+0.5).toFixed(1)+' МБ';document.getElementById('upVal').textContent=(Math.random()*2+0.1).toFixed(1)+' МБ';},1000);}
+function startSim(){if(simI)clearInterval(simI);simI=setInterval(()=>{document.getElementById('downVal').textContent=(Math.random()*5+0.5).toFixed(1)+' МБ';document.getElementById('upVal').textContent=(Math.random()*2+0.1).toFixed(1)+' МБ';document.getElementById('pingVal').textContent=servers[active].p+' мс';},1000);}
 function stopSim(){if(simI){clearInterval(simI);simI=null;}}
-function startReal(){if(realI)clearInterval(realI);realI=setInterval(async()=>{try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){const r=await window.Capacitor.Plugins.CvetikVpn.getStats();document.getElementById('downVal').textContent=fmt(r.rx);document.getElementById('upVal').textContent=fmt(r.tx);}}catch(e){}},1000);}
+function startReal(){if(realI)clearInterval(realI);realI=setInterval(async()=>{try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){const r=await window.Capacitor.Plugins.CvetikVpn.getStats();document.getElementById('downVal').textContent=fmt(r.rx);document.getElementById('upVal').textContent=fmt(r.tx);document.getElementById('pingVal').textContent=servers[active].p+' мс';}}catch(e){}},1000);}
 function stopReal(){if(realI){clearInterval(realI);realI=null;}}
 function fmt(b){if(!b||b<0)return'0.0';const m=b/(1024*1024);if(m<1)return(b/1024).toFixed(1)+' КБ';return m.toFixed(1)+' МБ';}
 
@@ -195,7 +184,7 @@ let toastT;
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2500);}
 
 render();
-document.getElementById('statusSub').textContent=servers[active]?servers[active].n+' • '+servers[active].e:'Добавь сервер';
+document.getElementById('statusSub').textContent=servers[active]?servers[active].n+' • '+servers[active].e:'Выберите сервер';
 pingAll();
 </script>
 </body>

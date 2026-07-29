@@ -34,10 +34,12 @@ jobs:
         import com.getcapacitor.PluginCall
         import com.getcapacitor.PluginMethod
         import com.getcapacitor.annotation.CapacitorPlugin
+        import java.net.InetAddress
         @CapacitorPlugin(name = "CvetikVpn")
         class CvetikVpnPlugin : Plugin() {
             private val VPN_REQUEST_CODE = 1001
             private var pendingCall: PluginCall? = null
+
             @PluginMethod
             fun connect(call: PluginCall) {
                 val endpoint = call.getString("endpoint", "") ?: ""
@@ -52,6 +54,7 @@ jobs:
                     val ret = JSObject(); ret.put("status", "connected"); call.resolve(ret)
                 }
             }
+
             @PluginMethod
             fun disconnect(call: PluginCall) {
                 val intent = Intent(context, CvetikVpnService::class.java)
@@ -60,6 +63,7 @@ jobs:
                 else context.startService(intent)
                 val ret = JSObject(); ret.put("status", "disconnected"); call.resolve(ret)
             }
+
             @PluginMethod
             fun getStats(call: PluginCall) {
                 val ret = JSObject()
@@ -68,6 +72,29 @@ jobs:
                 ret.put("connected", CvetikVpnService.isRunning)
                 call.resolve(ret)
             }
+
+            @PluginMethod
+            fun ping(call: PluginCall) {
+                val host = call.getString("host", "") ?: ""
+                if (host.isEmpty()) { call.reject("No host"); return }
+                Thread {
+                    try {
+                        val start = System.currentTimeMillis()
+                        val reachable = InetAddress.getByName(host).isReachable(3000)
+                        val ms = if (reachable) System.currentTimeMillis() - start else 999
+                        val ret = JSObject()
+                        ret.put("ms", ms)
+                        ret.put("reachable", reachable)
+                        call.resolve(ret)
+                    } catch (e: Exception) {
+                        val ret = JSObject()
+                        ret.put("ms", 999)
+                        ret.put("reachable", false)
+                        call.resolve(ret)
+                    }
+                }.start()
+            }
+
             private fun startVpnService(endpoint: String, name: String) {
                 val intent = Intent(context, CvetikVpnService::class.java)
                 intent.action = CvetikVpnService.ACTION_CONNECT
@@ -76,6 +103,7 @@ jobs:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(intent)
                 else context.startService(intent)
             }
+
             override fun handleOnActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
                 super.handleOnActivityResult(requestCode, resultCode, data)
                 if (requestCode == VPN_REQUEST_CODE) {
@@ -85,7 +113,11 @@ jobs:
                         val name = call?.getString("name", "CVETIK-VPN") ?: "CVETIK-VPN"
                         startVpnService(endpoint, name)
                         val ret = JSObject(); ret.put("status", "connected"); call?.resolve(ret)
-                    } else { call?.reject("VPN permission denied") }
+                    } else { 
+                        val ret = JSObject()
+                        ret.put("status", "permission_required")
+                        call?.resolve(ret)
+                    }
                 }
             }
         }
@@ -201,7 +233,7 @@ jobs:
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle(name)
-                    .setContentText("VPN активен")
+                    .setContentText("VPN активен • Перенаправление трафика")
                     .setSmallIcon(android.R.drawable.ic_lock_idle_lock)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)
