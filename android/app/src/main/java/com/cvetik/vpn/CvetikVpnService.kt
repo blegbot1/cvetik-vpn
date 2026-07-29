@@ -118,11 +118,10 @@ class CvetikVpnService : VpnService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(name)
-            .setContentText("VPN активен • Трафик шифруется")
+            .setContentText("VPN активен")
             .setSmallIcon(android.R.drawable.ic_lock_idle_lock)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .setOnlyAlertOnce(true)
             .build()
         startForeground(NOTIFICATION_ID, notification)
     }
