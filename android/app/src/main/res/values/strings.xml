@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">CVETIK-VPN</string>
-    <string name="title_activity_main">CVETIK-VPN</string>
-    <string name="package_name">com.cvetik.vpn</string>
-    <string name="custom_url_scheme">com.cvetik.vpn</string>
-</resources>

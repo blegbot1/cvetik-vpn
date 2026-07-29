@@ -2,639 +2,304 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0a0e27">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CVETIK-VPN</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0e27;color:#fff;position:fixed;touch-action:none}
-.bg{position:fixed;inset:0;z-index:-3;background:linear-gradient(135deg,#0a0e27 0%,#1a1f4e 25%,#2d1b4e 50%,#1a1f4e 75%,#0a0e27 100%);background-size:400% 400%;animation:bgMove 18s ease infinite}
-@keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.particles{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
-.particle{position:absolute;width:3px;height:3px;background:rgba(230,57,70,0.5);border-radius:50%;box-shadow:0 0 8px rgba(230,57,70,0.8);animation:rise linear infinite}
-@keyframes rise{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-10vh) scale(1);opacity:0}}
-.mesh{position:fixed;inset:0;z-index:-1;opacity:0.35;background:radial-gradient(circle at 20% 80%,rgba(230,57,70,0.35) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(69,123,157,0.35) 0%,transparent 50%);animation:meshPulse 8s ease-in-out infinite}
-@keyframes meshPulse{0%,100%{opacity:0.25}50%{opacity:0.5}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
-/* AppBar */
-.appbar{position:fixed;top:0;left:0;right:0;height:56px;padding:0 16px;display:flex;align-items:center;z-index:100;background:rgba(10,14,39,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06)}
-.menu{width:40px;height:40px;display:flex;flex-direction:column;justify-content:center;gap:5px;cursor:pointer}
-.menu span{height:2.5px;border-radius:2px;background:linear-gradient(90deg,#e63946,#457b9d);transition:all 0.3s}
-.menu span:nth-child(1){width:20px}.menu span:nth-child(2){width:28px}.menu span:nth-child(3){width:14px}
-.title{margin-left:14px;font-size:20px;font-weight:800;letter-spacing:0.5px;background:linear-gradient(135deg,#e63946 0%,#457b9d 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.title span{font-weight:300;opacity:0.7;-webkit-text-fill-color:rgba(255,255,255,0.7)}
+/* Header */
+.header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#161b22;border-bottom:1px solid #30363d}
+.logo{font-size:18px;font-weight:700;background:linear-gradient(90deg,#e63946,#457b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.server-btn{background:#21262d;border:1px solid #30363d;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer}
+.server-btn:active{background:#30363d}
 
-/* Drawer */
-.doverlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(4px)}
-.doverlay.on{opacity:1;pointer-events:all}
-.drawer{position:fixed;top:0;left:0;width:280px;height:100%;background:linear-gradient(180deg,#0f1535,#1a1f4e);z-index:201;transform:translateX(-100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:10px 0 50px rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden}
-.drawer.on{transform:translateX(0)}
-.dhead{padding:48px 20px 24px;background:linear-gradient(135deg,rgba(230,57,70,0.15),rgba(69,123,157,0.15));border-bottom:1px solid rgba(255,255,255,0.05);position:relative;overflow:hidden}
-.dhead::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(230,57,70,0.2) 0%,transparent 70%);animation:dheadGlow 4s ease-in-out infinite}
-@keyframes dheadGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.dtitle{font-size:24px;font-weight:800;background:linear-gradient(135deg,#e63946,#457b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1}
-.dsub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;position:relative;z-index:1}
-.ditem{padding:16px 20px;display:flex;align-items:center;gap:16px;color:rgba(255,255,255,0.75);cursor:pointer;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.03);position:relative;overflow:hidden;font-size:15px}
-.ditem::before{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(230,57,70,0.2),transparent);transition:width 0.3s}
-.ditem:active::before{width:100%}
-.ditem:active{color:#fff;background:rgba(255,255,255,0.03)}
-.ditem svg{width:22px;height:22px;opacity:0.7;flex-shrink:0}
-.ditem.on{background:linear-gradient(90deg,rgba(230,57,70,0.15),transparent);border-left:3px solid #e63946;color:#fff}
+/* Server selector */
+.server-panel{position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:100;display:none;flex-direction:column;align-items:center;padding:20px}
+.server-panel.on{display:flex}
+.panel-box{background:#161b22;border:1px solid #30363d;border-radius:16px;width:100%;max-width:400px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column}
+.panel-head{padding:16px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center}
+.panel-title{font-size:16px;font-weight:600}
+.panel-close{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;width:32px;height:32px}
+.server-list{overflow-y:auto;flex:1;padding:8px}
+.server-item{display:flex;align-items:center;padding:12px;margin:4px 8px;border-radius:10px;background:#21262d;cursor:pointer;transition:0.15s}
+.server-item:active{background:#30363d;transform:scale(0.98)}
+.server-item.on{background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.3)}
+.server-flag{width:36px;height:36px;border-radius:8px;background:#30363d;display:flex;align-items:center;justify-content:center;font-size:18px;margin-right:12px;flex-shrink:0}
+.server-info{flex:1;min-width:0}
+.server-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.server-addr{font-size:11px;color:#8b949e;margin-top:2px}
+.server-ping{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;flex-shrink:0;margin-left:8px}
+.ping-good{background:rgba(46,204,113,0.15);color:#2ecc71}
+.ping-mid{background:rgba(241,196,15,0.15);color:#f1c40f}
+.ping-bad{background:rgba(230,57,70,0.15);color:#e63946}
 
 /* Main */
-.main{padding-top:56px;height:100vh;display:flex;flex-direction:column;align-items:center;position:relative}
-
-/* Connect area */
-.connect{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;width:100%;position:relative;padding:20px;padding-top:6vh;transition:all 0.4s}
-.connect.shifted{transform:translateY(-40px)}
-
-/* Speed lines */
-.speed{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:260px;height:260px;pointer-events:none;opacity:0;transition:opacity 0.5s}
-.speed.on{opacity:1}
-.sline{position:absolute;top:50%;left:50%;width:2px;height:40px;background:linear-gradient(to top,transparent,rgba(230,57,70,0.4));transform-origin:bottom center;animation:swhoosh 1.5s linear infinite}
-@keyframes swhoosh{0%{transform:translate(-50%,-100%) rotate(var(--r)) scaleY(0);opacity:0}30%{opacity:1}100%{transform:translate(-50%,-100%) rotate(var(--r)) scaleY(1.5);opacity:0}}
-
-/* Rings */
-.ringwrap{position:relative;width:165px;height:165px;display:flex;align-items:center;justify-content:center}
-.ring{position:absolute;border-radius:50%;border:2px solid transparent;animation:ringPulse 3s cubic-bezier(0.4,0,0.2,1) infinite}
-.r1{width:165px;height:165px;border-color:rgba(230,57,70,0.25);animation-delay:0s}
-.r2{width:140px;height:140px;border-color:rgba(69,123,157,0.25);animation-delay:0.6s}
-.r3{width:115px;height:115px;border-color:rgba(230,57,70,0.15);animation-delay:1.2s}
-@keyframes ringPulse{0%{transform:scale(1);opacity:1}100%{transform:scale(1.4);opacity:0}}
-
-/* Main button */
-.cbtn{width:95px;height:95px;border-radius:50%;border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;position:relative;z-index:10;background:linear-gradient(135deg,#e63946 0%,#457b9d 100%);box-shadow:0 8px 32px rgba(230,57,70,0.35),0 0 0 1px rgba(255,255,255,0.1),inset 0 1px 0 rgba(255,255,255,0.2);transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;overflow:hidden}
-.cbtn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);opacity:0;transition:opacity 0.3s}
-.cbtn:active{transform:scale(0.92)}
-.cbtn:active::before{opacity:1}
-.cbtn.on{background:linear-gradient(135deg,#2ecc71 0%,#27ae60 100%);box-shadow:0 8px 32px rgba(46,204,113,0.35),0 0 0 1px rgba(255,255,255,0.1),inset 0 1px 0 rgba(255,255,255,0.2)}
-.cicon{font-size:28px;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))}
-.cbtn.on .cicon{transform:rotate(180deg) scale(1.1)}
-.clabel{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;opacity:0.9;font-weight:600}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative}
 
 /* Status */
-.stext{margin-top:24px;text-align:center;transition:all 0.3s}
-.stext .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e63946;margin-right:8px;box-shadow:0 0 12px #e63946;animation:dotBlink 2s infinite;transition:all 0.3s}
-.stext .dot.on{background:#2ecc71;box-shadow:0 0 12px #2ecc71;animation:none}
-@keyframes dotBlink{0%,100%{opacity:1}50%{opacity:0.4}}
-.stitle{font-size:18px;font-weight:700;letter-spacing:0.3px}
-.ssub{font-size:13px;color:rgba(255,255,255,0.45);margin-top:5px;font-weight:400}
+.status{text-align:center;margin-bottom:30px}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#e63946;display:inline-block;margin-right:8px;box-shadow:0 0 12px #e63946}
+.status-dot.on{background:#2ecc71;box-shadow:0 0 12px #2ecc71}
+.status-title{font-size:20px;font-weight:700}
+.status-sub{font-size:13px;color:#8b949e;margin-top:6px}
+
+/* Connect button */
+.connect-btn{width:140px;height:140px;border-radius:50%;border:none;background:linear-gradient(135deg,#e63946,#457b9d);color:#fff;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px rgba(230,57,70,0.4);transition:all 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.connect-btn:active{transform:scale(0.92)}
+.connect-btn.on{background:linear-gradient(135deg,#2ecc71,#27ae60);box-shadow:0 8px 32px rgba(46,204,113,0.4)}
+.connect-icon{font-size:32px}
+.connect-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.9}
 
 /* Stats */
-.stats{display:flex;gap:28px;margin-top:20px;opacity:0;transform:translateY(12px);transition:all 0.6s cubic-bezier(0.4,0,0.2,1)}
+.stats{display:flex;gap:20px;margin-top:24px;opacity:0;transform:translateY(10px);transition:all 0.4s}
 .stats.on{opacity:1;transform:translateY(0)}
-.stat{text-align:center;padding:10px 16px;background:rgba(255,255,255,0.03);border-radius:16px;border:1px solid rgba(255,255,255,0.05);backdrop-filter:blur(10px)}
-.sval{font-size:22px;font-weight:800;background:linear-gradient(135deg,#e63946,#457b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.slab{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+.stat{text-align:center;background:#161b22;border:1px solid #30363d;border-radius:12px;padding:12px 20px;min-width:80px}
+.stat-val{font-size:18px;font-weight:800;background:linear-gradient(90deg,#e63946,#457b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-lab{font-size:10px;color:#8b949e;margin-top:2px;text-transform:uppercase}
 
-/* Bottom sheet */
-.sheet{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(15,21,53,0.97),rgba(10,14,39,0.99));backdrop-filter:blur(40px);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,255,255,0.08);z-index:50;box-shadow:0 -10px 40px rgba(0,0,0,0.5);transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);max-height:38vh;display:flex;flex-direction:column;transform:translateY(0)}
-.sheet.down{transform:translateY(calc(100% - 70px))}
-.shandle{width:40px;height:5px;background:rgba(255,255,255,0.2);border-radius:3px;margin:10px auto;cursor:pointer;transition:all 0.2s}
-.shandle:active{background:rgba(255,255,255,0.35);width:50px}
-.shead{padding:0 20px 12px;display:flex;justify-content:space-between;align-items:center}
-.stitle2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
-.scnt{font-size:11px;color:rgba(255,255,255,0.5);background:rgba(230,57,70,0.15);padding:5px 12px;border-radius:20px;font-weight:600}
-.slist{overflow-y:auto;padding:0 16px 20px;flex:1;-webkit-overflow-scrolling:touch}
-.slist::-webkit-scrollbar{width:0}
-.sitem{display:flex;align-items:center;padding:14px 16px;margin-bottom:8px;background:rgba(255,255,255,0.025);border-radius:16px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden}
-.sitem::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#e63946,#457b9d);opacity:0;transition:opacity 0.2s}
-.sitem:active,.sitem.on{background:rgba(255,255,255,0.07);transform:translateX(6px) scale(0.98)}
-.sitem.on::before{opacity:1}
-.sflag{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-right:14px;background:rgba(255,255,255,0.04);flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05)}
-.sinfo{flex:1;min-width:0}
-.sname{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.smeta{font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sping{font-size:11px;font-weight:700;padding:5px 10px;border-radius:10px;flex-shrink:0;margin-left:8px;min-width:52px;text-align:center}
-.sping.good{background:rgba(46,204,113,0.12);color:#2ecc71}
-.sping.mid{background:rgba(241,196,15,0.12);color:#f1c40f}
-.sping.bad{background:rgba(230,57,70,0.12);color:#e63946}
-.sping.load{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);animation:pulsePing 1s infinite}
-@keyframes pulsePing{0%,100%{opacity:1}50%{opacity:0.5}}
+/* Add server */
+.add-btn{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#e63946;border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(230,57,70,0.4);z-index:50}
+.add-btn:active{transform:scale(0.9)}
 
-/* FAB */
-.fab{position:fixed;bottom:calc(38vh + 20px);right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e63946,#457b9d);border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 6px 24px rgba(230,57,70,0.4);z-index:60;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;justify-content:center;font-weight:300}
-.fab:active{transform:scale(0.88) rotate(90deg)}
-.fab.hide{transform:scale(0) rotate(180deg);opacity:0}
-
-/* Modals */
-.moverlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px)}
-.moverlay.on{opacity:1;pointer-events:all}
-.modal{background:linear-gradient(180deg,#1a1f4e,#0f1535);width:100%;border-radius:24px 24px 0 0;padding:24px;transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);max-height:80vh;overflow-y:auto;box-shadow:0 -20px 60px rgba(0,0,0,0.6)}
-.moverlay.on .modal{transform:translateY(0)}
-.mtitle{font-size:20px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.mclose{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-.mclose:active{background:rgba(230,57,70,0.2);transform:scale(0.9)}
-.mopt{padding:18px;background:rgba(255,255,255,0.04);border-radius:16px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;border:1px solid rgba(255,255,255,0.06);position:relative;overflow:hidden}
-.mopt::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(230,57,70,0.1),rgba(69,123,157,0.1));opacity:0;transition:opacity 0.2s}
-.mopt:active::before{opacity:1}
-.mopt:active{transform:scale(0.98)}
-.moptt{font-weight:600;margin-bottom:4px;font-size:15px}
-.moptd{font-size:13px;color:rgba(255,255,255,0.45)}
-input[type="text"],input[type="url"]{width:100%;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;color:#fff;font-size:15px;margin:8px 0;transition:all 0.2s}
-input:focus{border-color:#e63946;background:rgba(255,255,255,0.08);box-shadow:0 0 0 3px rgba(230,57,70,0.15)}
-input::placeholder{color:rgba(255,255,255,0.3)}
-.btn{width:100%;padding:16px;background:linear-gradient(135deg,#e63946,#457b9d);border:none;border-radius:16px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:14px;transition:all 0.2s;position:relative;overflow:hidden;letter-spacing:0.5px}
-.btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);opacity:0;transition:opacity 0.2s}
-.btn:active::before{opacity:1}
-.btn:active{transform:scale(0.97)}
-
-/* Split tunneling apps list */
-.applist{margin-top:8px}
-.appitem{display:flex;align-items:center;padding:14px 16px;margin-bottom:8px;background:rgba(255,255,255,0.03);border-radius:14px;border:1px solid rgba(255,255,255,0.05);transition:all 0.2s}
-.appitem.on{background:rgba(46,204,113,0.08);border-color:rgba(46,204,113,0.15)}
-.appicon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:20px;margin-right:14px;flex-shrink:0}
-.appinfo{flex:1}
-.appname{font-size:14px;font-weight:600}
-.apppkg{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px}
-.apptoggle{width:48px;height:28px;border-radius:14px;background:rgba(255,255,255,0.1);position:relative;cursor:pointer;transition:all 0.3s;flex-shrink:0}
-.apptoggle.on{background:linear-gradient(135deg,#2ecc71,#27ae60)}
-.apptoggle::after{content:'';position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);transition:all 0.3s}
-.apptoggle.on::after{left:22px}
+/* Modal add */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.on{display:flex}
+.modal-box{background:#161b22;border:1px solid #30363d;border-radius:16px;width:100%;max-width:360px;padding:20px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal-input{width:100%;padding:12px 14px;background:#21262d;border:1px solid #30363d;border-radius:10px;color:#fff;font-size:14px;margin-bottom:10px}
+.modal-input:focus{border-color:#e63946;outline:none}
+.modal-btn{width:100%;padding:14px;background:linear-gradient(135deg,#e63946,#457b9d);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
+.modal-btn:active{transform:scale(0.97)}
 
 /* Toast */
-.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(15,21,53,0.95);backdrop-filter:blur(20px);padding:14px 28px;border-radius:28px;border:1px solid rgba(255,255,255,0.08);font-size:14px;z-index:400;opacity:0;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,0.4);font-weight:500}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:#161b22;border:1px solid #30363d;padding:12px 24px;border-radius:24px;font-size:14px;z-index:300;opacity:0;transition:all 0.4s;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
 </style>
 </head>
 <body>
-<div class="bg"></div>
-<div class="mesh"></div>
-<div class="particles" id="particles"></div>
 
-<div class="appbar">
-  <div class="menu" onclick="toggleDrawer()">
-    <span></span><span></span><span></span>
-  </div>
-  <div class="title">CVETIK<span>-VPN</span></div>
+<div class="header">
+  <div class="logo">CVETIK-VPN</div>
+  <button class="server-btn" onclick="toggleServers()">🌐 Серверы</button>
 </div>
 
-<div class="doverlay" id="dover" onclick="toggleDrawer()"></div>
-<div class="drawer" id="drawer">
-  <div class="dhead">
-    <div class="dtitle">CVETIK-VPN</div>
-    <div class="dsub">🔥 Премиум доступ • 20+ серверов</div>
-  </div>
-  <div class="ditem on" onclick="goHome()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Главная
-  </div>
-  <div class="ditem" onclick="showSplit()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 6.34L2.1 2.1m17.8 17.8l-4.24-4.24M6.34 17.66l-4.24 4.24M23 12h-6m-6 0H1m20.24-4.24l-4.24 4.24M6.34 6.34l-4.24-4.24"/></svg>
-    Раздельное туннелирование
-  </div>
-  <div class="ditem" onclick="showGitHubSync()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-    GitHub Синхронизация
-  </div>
-  <div class="ditem" onclick="toast('CVETIK-VPN v2.0\nby blegbot1')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-    О приложении
+<div class="server-panel" id="serverPanel" onclick="if(event.target===this)toggleServers()">
+  <div class="panel-box">
+    <div class="panel-head">
+      <div class="panel-title">Выберите сервер</div>
+      <button class="panel-close" onclick="toggleServers()">✕</button>
+    </div>
+    <div class="server-list" id="serverList"></div>
   </div>
 </div>
 
 <div class="main">
-  <div class="connect" id="connectArea">
-    <div class="speed" id="speed"></div>
-    <div class="ringwrap">
-      <div class="ring r1"></div>
-      <div class="ring r2"></div>
-      <div class="ring r3"></div>
-      <button class="cbtn" id="cbtn" onclick="toggleConnect()">
-        <span class="cicon" id="cicon">⚡</span>
-        <span class="clabel" id="clabel">ВКЛ</span>
-      </button>
-    </div>
-    <div class="stext">
-      <span class="dot" id="dot"></span>
-      <span class="stitle" id="stitle">ВЫКЛЮЧЕНО</span>
-      <div class="ssub" id="ssub">Нажми чтобы подключиться</div>
-    </div>
-    <div class="stats" id="stats">
-      <div class="stat"><div class="sval" id="down">0.0</div><div class="slab">Мбит/с ↓</div></div>
-      <div class="stat"><div class="sval" id="up">0.0</div><div class="slab">Мбит/с ↑</div></div>
-      <div class="stat"><div class="sval" id="ping">--</div><div class="slab">мс</div></div>
-    </div>
+  <div class="status">
+    <div><span class="status-dot" id="statusDot"></span><span class="status-title" id="statusTitle">Отключено</span></div>
+    <div class="status-sub" id="statusSub">Выберите сервер и подключитесь</div>
+  </div>
+
+  <button class="connect-btn" id="connectBtn" onclick="toggleConnect()">
+    <span class="connect-icon" id="connectIcon">⚡</span>
+    <span class="connect-label" id="connectLabel">ВКЛ</span>
+  </button>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="stat-val" id="downVal">0.0</div><div class="stat-lab">Download</div></div>
+    <div class="stat"><div class="stat-val" id="upVal">0.0</div><div class="stat-lab">Upload</div></div>
+    <div class="stat"><div class="stat-val" id="pingVal">--</div><div class="stat-lab">Ping</div></div>
   </div>
 </div>
 
-<div class="sheet down" id="sheet">
-  <div class="shandle" id="shandle"></div>
-  <div class="shead">
-    <div class="stitle2">📡 Серверы</div>
-    <div class="scnt" id="scnt">0 конфигов</div>
-  </div>
-  <div class="slist" id="slist"></div>
-</div>
+<button class="add-btn" onclick="showAdd()">+</button>
 
-<button class="fab hide" id="fab" onclick="showAdd()">+</button>
-
-<!-- GitHub Sync Modal -->
-<div class="moverlay" id="mgithub">
-  <div class="modal">
-    <div class="mtitle">
-      <span>☁️ GitHub Синхронизация</span>
-      <button class="mclose" onclick="closeModal('mgithub')">✕</button>
-    </div>
-    <input type="url" id="gurl" placeholder="https://github.com/username/repo">
-    <div style="font-size:13px;color:rgba(255,255,255,0.4);margin:8px 0 16px">Введи ссылку на репозиторий с .conf файлами. Они автоматически загрузятся.</div>
-    <button class="btn" onclick="syncGitHub()">🔄 Синхронизировать</button>
-  </div>
-</div>
-
-<!-- Split Tunneling Modal -->
-<div class="moverlay" id="msplit">
-  <div class="modal">
-    <div class="mtitle">
-      <span>🔀 Раздельное туннелирование</span>
-      <button class="mclose" onclick="closeModal('msplit')">✕</button>
-    </div>
-    <div class="mopt" onclick="setSplitMode('all')" id="smode-all">
-      <div class="moptt">🌐 Все приложения</div>
-      <div class="moptd">Весь трафик идёт через VPN туннель</div>
-    </div>
-    <div class="mopt" onclick="setSplitMode('include')" id="smode-include">
-      <div class="moptt">📱 Только выбранные</div>
-      <div class="moptd">Укажи приложения которые работают через VPN</div>
-    </div>
-    <div class="mopt" onclick="setSplitMode('exclude')" id="smode-exclude">
-      <div class="moptt">🚫 Кроме выбранных</div>
-      <div class="moptd">Все приложения кроме указанных через VPN</div>
-    </div>
-    <div id="splitApps" style="display:none;margin-top:12px">
-      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:10px">Выбери приложения:</div>
-      <div class="applist" id="applist"></div>
-    </div>
+<div class="modal" id="addModal" onclick="if(event.target===this)hideAdd()">
+  <div class="modal-box">
+    <div class="modal-title">Добавить сервер</div>
+    <input class="modal-input" id="addName" placeholder="Название (например: Германия)" type="text">
+    <input class="modal-input" id="addAddr" placeholder="Адрес:порт (например: 1.2.3.4:4500)" type="text">
+    <input class="modal-input" id="addFlag" placeholder="Флаг (emoji, например: 🇩🇪)" type="text">
+    <button class="modal-btn" onclick="addServer()">Добавить</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// === DATA ===
-let configs = JSON.parse(localStorage.getItem('cv_configs')) || [
-  {n:'🇷🇺 Крым-поток',e:'engage.cloudflareclient.com:4500',p:null,f:'🇷🇺'},
-  {n:'🇷🇺 Крым-протоколХ-1',e:'188.114.96.160:500',p:null,f:'🇷🇺'},
-  {n:'🇷🇺 Крым-протоколХ-2',e:'188.114.96.144:500',p:null,f:'🇷🇺'},
-  {n:'🇷🇺 Крым-протоколХ-3',e:'188.114.96.128:4500',p:null,f:'🇷🇺'},
-  {n:'🇷🇺 Москва-1',e:'engage.cloudflareclient.com:4500',p:null,f:'🇷🇺'},
-  {n:'🇷🇺 Москва-2',e:'engage.cloudflareclient.com:4500',p:null,f:'🇷🇺'},
-  {n:'🇷🇺 Пермь-1',e:'engage.cloudflareclient.com:4500',p:null,f:'🇷🇺'},
-  {n:'🇷🇺 Пермь-2',e:'engage.cloudflareclient.com:4500',p:null,f:'🇷🇺'},
-  {n:'🇩🇪 Германия',e:'de.tribukvy.ltd:4500',p:null,f:'🇩🇪'},
-  {n:'🇳🇱 Нидерланды',e:'engage.cloudflareclient.com:4500',p:null,f:'🇳🇱'},
-  {n:'🇵🇱 Польша',e:'engage.cloudflareclient.com:4500',p:null,f:'🇵🇱'},
-  {n:'🔥 ПротоколX',e:'engage.cloudflareclient.com:4500',p:null,f:'🔥'},
-  {n:'🔥 ПротоколX-1',e:'engage.cloudflareclient.com:4500',p:null,f:'🔥'},
-  {n:'🔥 ПротоколX-2',e:'engage.cloudflareclient.com:4500',p:null,f:'🔥'},
-  {n:'🔥 ПротоколX-3',e:'engage.cloudflareclient.com:4500',p:null,f:'🔥'},
-  {n:'⭐ Старая версия-1',e:'162.159.195.1:500',p:null,f:'⭐'},
-  {n:'⭐ Старая версия-2',e:'162.159.195.4:500',p:null,f:'⭐'},
-  {n:'⭐ Старая версия-3',e:'162.159.195.4:500',p:null,f:'⭐'},
-  {n:'⭐ Старая версия-4',e:'162.159.195.4:500',p:null,f:'⭐'},
-  {n:'☁️ Крым-Cloudflare',e:'engage.cloudflareclient.com:4500',p:null,f:'☁️'}
+// === SERVERS ===
+let servers = JSON.parse(localStorage.getItem('cvetik_servers')) || [
+  {n:"Пермь-2",e:"engage.cloudflareclient.com:4500",f:"🇷🇺",p:0},
+  {n:"Германия",e:"de.tribukvy.ltd:4500",f:"🇩🇪",p:0},
+  {n:"Нидерланды",e:"engage.cloudflareclient.com:4500",f:"🇳🇱",p:0},
+  {n:"Польша",e:"engage.cloudflareclient.com:4500",f:"🇵🇱",p:0},
+  {n:"ПротоколX",e:"engage.cloudflareclient.com:4500",f:"🔥",p:0},
+  {n:"ПротоколX-1",e:"engage.cloudflareclient.com:4500",f:"🔥",p:0}
 ];
-let active = 0, connected = false, si = null;
-let splitMode = localStorage.getItem('cv_split_mode') || 'all';
-let splitApps = JSON.parse(localStorage.getItem('cv_split_apps')) || {};
+let active = parseInt(localStorage.getItem('cvetik_active')) || 0;
+let connected = false;
 
-const appList = [
-  {name:'Telegram',pkg:'org.telegram.messenger',icon:'✈️'},
-  {name:'YouTube',pkg:'com.google.android.youtube',icon:'▶️'},
-  {name:'Chrome',pkg:'com.android.chrome',icon:'🌐'},
-  {name:'Instagram',pkg:'com.instagram.android',icon:'📸'},
-  {name:'TikTok',pkg:'com.zhiliaoapp.musically',icon:'🎵'},
-  {name:'Discord',pkg:'com.discord',icon:'🎮'},
-  {name:'Twitter / X',pkg:'com.twitter.android',icon:'🐦'},
-  {name:'Spotify',pkg:'com.spotify.music',icon:'🎧'},
-  {name:'Twitch',pkg:'tv.twitch.android.app',icon:'📺'},
-  {name:'WhatsApp',pkg:'com.whatsapp',icon:'💬'},
-  {name:'Facebook',pkg:'com.facebook.katana',icon:'👥'},
-  {name:'Netflix',pkg:'com.netflix.mediaclient',icon:'🍿'}
-];
-
-// === INIT ===
-function init(){
-  const pd = document.getElementById('particles');
-  for(let i=0;i<25;i++){
-    const d=document.createElement('div');
-    d.className='particle';
-    d.style.left=Math.random()*100+'%';
-    d.style.animationDuration=(12+Math.random()*16)+'s';
-    d.style.animationDelay=Math.random()*20+'s';
-    d.style.width=(2+Math.random()*3)+'px';
-    d.style.height=d.style.width;
-    pd.appendChild(d);
-  }
-  const spd=document.getElementById('speed');
-  for(let i=0;i<12;i++){
-    const d=document.createElement('div');
-    d.className='sline';
-    d.style.setProperty('--r',(i*30)+'deg');
-    d.style.animationDelay=(i*0.12)+'s';
-    d.style.height=(30+Math.random()*30)+'px';
-    spd.appendChild(d);
-  }
-  render();
-  pingAll();
-  setTimeout(()=>{
-    document.getElementById('sheet').classList.remove('down');
-    document.getElementById('fab').classList.remove('hide');
-  },600);
-  initSheetSwipe();
+function saveServers(){
+  localStorage.setItem('cvetik_servers', JSON.stringify(servers));
+  localStorage.setItem('cvetik_active', active);
 }
 
-// === REAL PING ===
-async function pingOne(idx){
-  const cfg = configs[idx];
-  const el = document.getElementById('ping-'+idx);
-  if(el) el.className='sping load';
-  const host = cfg.e.split(':')[0];
-  const start = performance.now();
+function renderServers(){
+  const list = document.getElementById('serverList');
+  list.innerHTML = servers.map((s,i)=>{
+    const on = i===active ? ' on' : '';
+    const pingClass = s.p===0 ? '' : (s.p<100 ? 'ping-good' : (s.p<300 ? 'ping-mid' : 'ping-bad'));
+    const pingText = s.p===0 ? '...' : s.p+' мс';
+    return `<div class="server-item${on}" onclick="selectServer(${i})">
+      <div class="server-flag">${s.f}</div>
+      <div class="server-info">
+        <div class="server-name">${s.n}</div>
+        <div class="server-addr">${s.e}</div>
+      </div>
+      <div class="server-ping ${pingClass}">${pingText}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectServer(i){
+  active = i;
+  saveServers();
+  renderServers();
+  if(connected){
+    toast('🔄 Переподключаемся к '+servers[active].n+'...');
+    toggleConnect();
+    setTimeout(toggleConnect, 800);
+  } else {
+    document.getElementById('statusSub').textContent = servers[active].n+' • '+servers[active].e;
+    toast('📍 Выбран: '+servers[active].n);
+  }
+}
+
+function toggleServers(){
+  document.getElementById('serverPanel').classList.toggle('on');
+}
+
+function showAdd(){
+  document.getElementById('addModal').classList.add('on');
+}
+function hideAdd(){
+  document.getElementById('addModal').classList.remove('on');
+}
+function addServer(){
+  const n = document.getElementById('addName').value.trim();
+  const e = document.getElementById('addAddr').value.trim();
+  const f = document.getElementById('addFlag').value.trim() || '📡';
+  if(!n || !e){toast('❌ Заполни все поля'); return;}
+  servers.push({n,e,f,p:0});
+  saveServers();
+  renderServers();
+  hideAdd();
+  document.getElementById('addName').value='';
+  document.getElementById('addAddr').value='';
+  document.getElementById('addFlag').value='';
+  toast('✅ Сервер добавлен');
+}
+
+// === PING ===
+async function pingServer(url){
+  const start = Date.now();
   try{
-    await fetch('https://'+host, {mode:'no-cors', cache:'no-store'});
+    await fetch('http://'+url.split(':')[0], {mode:'no-cors', signal: AbortSignal.timeout(3000)});
   }catch(e){}
-  const ms = Math.round(performance.now() - start);
-  cfg.p = ms;
-  save();
-  renderOne(idx);
+  return Date.now() - start;
 }
 
 async function pingAll(){
-  for(let i=0;i<configs.length;i++){
-    await pingOne(i);
-    await new Promise(r=>setTimeout(r,300));
+  for(let i=0;i<servers.length;i++){
+    const ms = await pingServer(servers[i].e);
+    servers[i].p = ms > 3000 ? 999 : ms;
+    renderServers();
   }
-}
-
-// === RENDER ===
-function render(){
-  const sl=document.getElementById('slist');
-  document.getElementById('scnt').textContent=configs.length+' конфигов';
-  sl.innerHTML=configs.map((c,i)=>renderItem(c,i)).join('');
-}
-
-function renderItem(c,i){
-  let pc='load',pt='...';
-  if(c.p!==null){
-    pc=c.p<80?'good':c.p<150?'mid':'bad';
-    pt=c.p+' мс';
-  }
-  return `<div class="sitem ${i===active?'on':''}" onclick="sel(${i})" id="item-${i}">
-    <div class="sflag">${c.f}</div>
-    <div class="sinfo"><div class="sname">${c.n}</div><div class="smeta">${c.e}</div></div>
-    <div class="sping ${pc}" id="ping-${i}">${pt}</div>
-  </div>`;
-}
-
-function renderOne(i){
-  const el=document.getElementById('item-'+i);
-  if(!el)return;
-  const c=configs[i];
-  const pc=c.p<80?'good':c.p<150?'mid':'bad';
-  const pingEl=document.getElementById('ping-'+i);
-  if(pingEl){pingEl.className='sping '+pc;pingEl.textContent=c.p+' мс';}
-}
-
-function sel(i){
-  active=i;
-  render();
-  toast('Выбран: '+configs[i].n);
-  if(connected){toggleConnect();setTimeout(toggleConnect,400)}
 }
 
 // === CONNECT ===
 async function toggleConnect(){
-  const btn=document.getElementById('cbtn');
-  const icon=document.getElementById('cicon');
-  const lbl=document.getElementById('clabel');
-  const dot=document.getElementById('dot');
-  const st=document.getElementById('stitle');
-  const su=document.getElementById('ssub');
-  const stats=document.getElementById('stats');
-  const speed=document.getElementById('speed');
-  const cfg=configs[active];
+  const btn = document.getElementById('connectBtn');
+  const icon = document.getElementById('connectIcon');
+  const label = document.getElementById('connectLabel');
+  const dot = document.getElementById('statusDot');
+  const title = document.getElementById('statusTitle');
+  const sub = document.getElementById('statusSub');
+  const stats = document.getElementById('stats');
+  const s = servers[active];
 
   if(!connected){
-    toast('⏳ Запрос разрешения VPN...');
+    toast('⏳ Подключение к '+s.n+'...');
     try{
-      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
-        const res=await window.Capacitor.Plugins.CvetikVpn.connect({endpoint:cfg.e,name:cfg.n});
-        if(res.status==='connected'){
-          connected=true;btn.classList.add('on');icon.textContent='⚡';lbl.textContent='ВКЛ';
-          dot.classList.add('on');st.textContent='Подключено';su.textContent=cfg.n+' • '+cfg.e;
-          stats.classList.add('on');speed.classList.add('on');startRealStats();
-          toast('✅ Подключено к '+cfg.n);
+      if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CvetikVpn){
+        const res = await window.Capacitor.Plugins.CvetikVpn.connect({endpoint:s.e, name:s.n});
+        if(res.status === 'connected'){
+          connected = true;
+          btn.classList.add('on'); icon.textContent='✓'; label.textContent='ВЫКЛ';
+          dot.classList.add('on'); title.textContent='Подключено'; sub.textContent=s.n+' • '+s.e;
+          stats.classList.add('on'); startRealStats();
+          toast('✅ Подключено к '+s.n);
         }else{toast('❌ Ошибка: '+(res.error||'unknown'));}
       }else{
-        connected=true;btn.classList.add('on');icon.textContent='⚡';lbl.textContent='ВКЛ';
-        dot.classList.add('on');st.textContent='Подключено (демо)';su.textContent=cfg.n+' • '+cfg.e;
-        stats.classList.add('on');speed.classList.add('on');startSim();
-        toast('✅ Демо-режим: '+cfg.n);
+        // Demo mode for web
+        connected = true;
+        btn.classList.add('on'); icon.textContent='✓'; label.textContent='ВЫКЛ';
+        dot.classList.add('on'); title.textContent='Подключено (демо)'; sub.textContent=s.n+' • '+s.e;
+        stats.classList.add('on'); startSim();
+        toast('✅ Демо-режим: '+s.n);
       }
     }catch(e){toast('❌ '+e.message);}
   }else{
-    try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
+    try{if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CvetikVpn){
       await window.Capacitor.Plugins.CvetikVpn.disconnect();
     }}catch(e){}
-    connected=false;btn.classList.remove('on');icon.textContent='⚡';lbl.textContent='ВКЛ';
-    dot.classList.remove('on');st.textContent='Отключено';su.textContent='Нажмите кнопку для подключения';
-    stats.classList.remove('on');speed.classList.remove('on');stopSim();stopRealStats();
+    connected = false;
+    btn.classList.remove('on'); icon.textContent='⚡'; label.textContent='ВКЛ';
+    dot.classList.remove('on'); title.textContent='Отключено'; sub.textContent='Выберите сервер и подключитесь';
+    stats.classList.remove('on'); stopSim(); stopRealStats();
     toast('❌ Отключено');
   }
 }
 
+// === STATS ===
+let simInt, realInt;
 function startSim(){
-  si=setInterval(()=>{
-    document.getElementById('down').textContent=(Math.random()*60+8).toFixed(1);
-    document.getElementById('up').textContent=(Math.random()*25+3).toFixed(1);
-    document.getElementById('ping').textContent=configs[active].p||'--';
-  },900);
+  if(simInt) clearInterval(simInt);
+  simInt = setInterval(()=>{
+    document.getElementById('downVal').textContent = (Math.random()*5+0.5).toFixed(1)+' МБ';
+    document.getElementById('upVal').textContent = (Math.random()*2+0.1).toFixed(1)+' МБ';
+  }, 1000);
 }
-function stopSim(){
-  clearInterval(si);
-  document.getElementById('down').textContent='0.0';
-  document.getElementById('up').textContent='0.0';
-  document.getElementById('ping').textContent='--';
-}
+function stopSim(){if(simInt){clearInterval(simInt);simInt=null;}}
 
-// === UI ===
-function toggleDrawer(){
-  document.getElementById('drawer').classList.toggle('on');
-  document.getElementById('dover').classList.toggle('on');
-}
-function goHome(){toggleDrawer()}
-function toast(t){
-  const el=document.getElementById('toast');
-  el.textContent=t;
-  el.classList.add('on');
-  setTimeout(()=>el.classList.remove('on'),2600);
-}
-
-// === SHEET SWIPE ===
-function initSheetSwipe(){
-  const sheet=document.getElementById('sheet');
-  const handle=document.getElementById('shandle');
-  let startY=0, startH=0, currentY=0, dragging=false;
-  function onStart(y){
-    dragging=true;
-    startY=y;
-    sheet.style.transition='none';
-  }
-  function onMove(y){
-    if(!dragging)return;
-    const dy=y-startY;
-    const max=window.innerHeight*0.45;
-    let trans=Math.max(0,Math.min(max,-dy));
-    if(sheet.classList.contains('down')) trans=max+dy;
-    sheet.style.transform=`translateY(${trans}px)`;
-  }
-  function onEnd(){
-    if(!dragging)return;
-    dragging=false;
-    sheet.style.transition='';
-    sheet.style.transform='';
-    const dy=currentY-startY;
-    if(Math.abs(dy)>60){
-      if(dy>0) sheet.classList.add('down');
-      else sheet.classList.remove('down');
-    }
-  }
-  handle.addEventListener('touchstart',e=>onStart(e.touches[0].clientY));
-  handle.addEventListener('touchmove',e=>{currentY=e.touches[0].clientY;onMove(currentY);});
-  handle.addEventListener('touchend',onEnd);
-  sheet.addEventListener('touchstart',e=>{if(e.target===sheet||e.target.classList.contains('shead'))onStart(e.touches[0].clientY);});
-  sheet.addEventListener('touchmove',e=>{currentY=e.touches[0].clientY;onMove(currentY);});
-  sheet.addEventListener('touchend',onEnd);
-}
-
-// === MODALS ===
-function showAdd(){document.getElementById('mgithub').classList.add('on')}
-function showGitHubSync(){toggleDrawer();document.getElementById('mgithub').classList.add('on')}
-function showSplit(){toggleDrawer();document.getElementById('msplit').classList.add('on');renderSplitApps()}
-function closeModal(id){document.getElementById(id).classList.remove('on')}
-
-// === GITHUB SYNC ===
-async function syncGitHub(){
-  const u=document.getElementById('gurl').value.trim();
-  if(!u){toast('❌ Введи URL');return}
-  toast('🔄 Синхронизация...');
-  closeModal('mgithub');
-  const m=u.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-  if(!m){toast('❌ Неверный URL');return}
-  try{
-    const res=await fetch(`https://api.github.com/repos/${m[1]}/${m[2]}/contents`);
-    const d=await res.json();
-    if(!Array.isArray(d)){toast('❌ Ошибка');return}
-    const files=d.filter(x=>x.name.endsWith('.conf'));
-    if(!files.length){toast('❌ .conf не найдены');return}
-    for(const f of files){
-      const c=await fetch(f.download_url).then(r=>r.text());
-      configs.push({n:'☁️ '+f.name.replace('.conf',''),e:'github',p:null,f:'☁️',c});
-    }
-    save();render();pingAll();
-    toast(`✅ Загружено ${files.length} конфигов!`);
-  }catch(e){toast('❌ '+e.message)}
-}
-
-// === SPLIT TUNNELING ===
-function setSplitMode(mode){
-  splitMode=mode;
-  localStorage.setItem('cv_split_mode',mode);
-  document.getElementById('smode-all').style.border=mode==='all'?'1px solid rgba(46,204,113,0.4)':'1px solid rgba(255,255,255,0.06)';
-  document.getElementById('smode-include').style.border=mode==='include'?'1px solid rgba(46,204,113,0.4)':'1px solid rgba(255,255,255,0.06)';
-  document.getElementById('smode-exclude').style.border=mode==='exclude'?'1px solid rgba(46,204,113,0.4)':'1px solid rgba(255,255,255,0.06)';
-  document.getElementById('splitApps').style.display=(mode==='all')?'none':'block';
-  renderSplitApps();
-  toast(mode==='all'?'🌐 Все приложения через VPN':mode==='include'?'📱 Только выбранные':'🚫 Кроме выбранных');
-}
-
-function renderSplitApps(){
-  const el=document.getElementById('applist');
-  el.innerHTML=appList.map(a=>`
-    <div class="appitem ${splitApps[a.pkg]?'on':''}">
-      <div class="appicon">${a.icon}</div>
-      <div class="appinfo"><div class="appname">${a.name}</div><div class="apppkg">${a.pkg}</div></div>
-      <div class="apptoggle ${splitApps[a.pkg]?'on':''}" onclick="toggleApp('${a.pkg}')"></div>
-    </div>
-  `).join('');
-}
-
-function toggleApp(pkg){
-  splitApps[pkg]=!splitApps[pkg];
-  localStorage.setItem('cv_split_apps',JSON.stringify(splitApps));
-  renderSplitApps();
-}
-
-function save(){localStorage.setItem('cv_configs',JSON.stringify(configs))}
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('data:text/javascript,'+encodeURIComponent(`
-    self.addEventListener('install',e=>self.skipWaiting());
-    self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
-    self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>new Response('Offline'))));
-  `)).catch(()=>{});
-}
-
-
-// === REAL STATS ===
-let statsInterval=null;
 function startRealStats(){
-  if(statsInterval)clearInterval(statsInterval);
-  statsInterval=setInterval(async()=>{
+  if(realInt) clearInterval(realInt);
+  realInt = setInterval(async()=>{
     try{
-      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
-        const res=await window.Capacitor.Plugins.CvetikVpn.getStats();
-        document.getElementById('down').textContent=fmtB(res.rx);
-        document.getElementById('up').textContent=fmtB(res.tx);
-        document.getElementById('ping').textContent=(configs[active].p||'--')+' мс';
+      if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CvetikVpn){
+        const res = await window.Capacitor.Plugins.CvetikVpn.getStats();
+        document.getElementById('downVal').textContent = fmtB(res.rx);
+        document.getElementById('upVal').textContent = fmtB(res.tx);
       }
     }catch(e){}
-  },1000);
+  }, 1000);
 }
-function stopRealStats(){if(statsInterval){clearInterval(statsInterval);statsInterval=null;}}
+function stopRealStats(){if(realInt){clearInterval(realInt);realInt=null;}}
 function fmtB(b){if(!b||b<0)return'0.0';const mb=b/(1024*1024);if(mb<1)return(b/1024).toFixed(1)+' КБ';return mb.toFixed(1)+' МБ';}
 
-// === REAL STATS ===
-let statsInterval=null;
-function startRealStats(){
-  if(statsInterval)clearInterval(statsInterval);
-  statsInterval=setInterval(async()=>{
-    try{
-      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
-        const res=await window.Capacitor.Plugins.CvetikVpn.getStats();
-        document.getElementById('down').textContent=fmtB(res.rx);
-        document.getElementById('up').textContent=fmtB(res.tx);
-        document.getElementById('ping').textContent=(configs[active].p||'--')+' мс';
-      }
-    }catch(e){}
-  },1000);
+// === TOAST ===
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>t.classList.remove('on'), 2500);
 }
-function stopRealStats(){if(statsInterval){clearInterval(statsInterval);statsInterval=null;}}
-function fmtB(b){if(!b||b<0)return'0.0';const mb=b/(1024*1024);if(mb<1)return(b/1024).toFixed(1)+' КБ';return mb.toFixed(1)+' МБ';}
 
-// === REAL STATS ===
-let statsInterval=null;
-function startRealStats(){
-  if(statsInterval)clearInterval(statsInterval);
-  statsInterval=setInterval(async()=>{
-    try{
-      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
-        const res=await window.Capacitor.Plugins.CvetikVpn.getStats();
-        document.getElementById('down').textContent=fmtB(res.rx);
-        document.getElementById('up').textContent=fmtB(res.tx);
-        document.getElementById('ping').textContent=(configs[active].p||'--')+' мс';
-      }
-    }catch(e){}
-  },1000);
-}
-function stopRealStats(){if(statsInterval){clearInterval(statsInterval);statsInterval=null;}}
-function fmtB(b){if(!b||b<0)return'0.0';const mb=b/(1024*1024);if(mb<1)return(b/1024).toFixed(1)+' КБ';return mb.toFixed(1)+' МБ';}
-init();
+// === INIT ===
+renderServers();
+document.getElementById('statusSub').textContent = servers[active] ? servers[active].n+' • '+servers[active].e : 'Добавьте сервер';
+pingAll();
 </script>
 </body>
 </html>
