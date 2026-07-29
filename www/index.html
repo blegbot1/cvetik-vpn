@@ -53,6 +53,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .stat-val{font-size:16px;font-weight:800;background:linear-gradient(90deg,#e63946,#457b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .stat-lab{font-size:10px;color:#8b949e;margin-top:2px;text-transform:uppercase}
 
+.import-btn{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#457b9d;border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(69,123,157,0.4);z-index:50;display:flex;align-items:center;justify-content:center}
+.import-btn:active{transform:scale(0.9)}
+#confInput{display:none}
+
 .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(60px);background:#161b22;border:1px solid #30363d;padding:12px 24px;border-radius:24px;font-size:14px;z-index:300;opacity:0;transition:all 0.4s;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -67,7 +71,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="server-panel" id="serverPanel" onclick="if(event.target===this)toggleServers()">
   <div class="panel-box">
     <div class="panel-head">
-      <div class="panel-title">Выберите сервер</div>
+      <div class="panel-title">Туннели</div>
       <button class="panel-close" onclick="toggleServers()">✕</button>
     </div>
     <div class="server-list" id="serverList"></div>
@@ -77,7 +81,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="main">
   <div class="status">
     <div><span class="status-dot" id="statusDot"></span><span class="status-title" id="statusTitle">Отключено</span></div>
-    <div class="status-sub" id="statusSub">Выберите сервер и подключитесь</div>
+    <div class="status-sub" id="statusSub">Выберите туннель</div>
   </div>
 
   <button class="connect-btn" id="connectBtn" onclick="toggleConnect()">
@@ -92,38 +96,62 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
+<button class="import-btn" onclick="document.getElementById('confInput').click()" title="Импорт .conf">📁</button>
+<input type="file" id="confInput" accept=".conf,.zip" onchange="importConf(this)">
+
 <div class="toast" id="toast"></div>
 
 <script>
-let servers = [
-  {n:"Пермь-2",e:"engage.cloudflareclient.com:4500",f:"🇷🇺",p:0},
-  {n:"Германия",e:"de.tribukvy.ltd:4500",f:"🇩🇪",p:0},
-  {n:"Нидерланды",e:"engage.cloudflareclient.com:4500",f:"🇳🇱",p:0},
-  {n:"Польша",e:"engage.cloudflareclient.com:4500",f:"🇵🇱",p:0},
-  {n:"ПротоколX",e:"engage.cloudflareclient.com:4500",f:"🔥",p:0},
-  {n:"ПротоколX-1",e:"engage.cloudflareclient.com:4500",f:"🔥",p:0}
+let servers = JSON.parse(localStorage.getItem('cvetik_servers')) || [
+  {n:"Пермь-2",e:"engage.cloudflareclient.com:4500",f:"🇷🇺",p:0,conf:""},
+  {n:"Германия",e:"de.tribukvy.ltd:4500",f:"🇩🇪",p:0,conf:""},
+  {n:"Нидерланды",e:"engage.cloudflareclient.com:4500",f:"🇳🇱",p:0,conf:""},
+  {n:"Польша",e:"engage.cloudflareclient.com:4500",f:"🇵🇱",p:0,conf:""},
+  {n:"ПротоколX",e:"engage.cloudflareclient.com:4500",f:"🔥",p:0,conf:""},
+  {n:"ПротоколX-1",e:"engage.cloudflareclient.com:4500",f:"🔥",p:0,conf:""}
 ];
 let active = parseInt(localStorage.getItem('cvetik_active')) || 0;
 let connected = false;
 
-function save(){localStorage.setItem('cvetik_active',active);}
+function save(){localStorage.setItem('cvetik_servers',JSON.stringify(servers));localStorage.setItem('cvetik_active',active);}
 
 function render(){
   document.getElementById('serverList').innerHTML = servers.map((s,i)=>{
     const on = i===active ? ' on' : '';
     const pc = s.p===0 ? 'ping-load' : (s.p<100 ? 'ping-good' : (s.p<300 ? 'ping-mid' : 'ping-bad'));
     const pt = s.p===0 ? '...' : s.p+' мс';
-    return `<div class="server-item${on}" onclick="sel(${i})"><div class="server-flag">${s.f}</div><div class="server-info"><div class="server-name">${s.n}</div><div class="server-addr">${s.e}</div></div><div class="server-ping ${pc}">${pt}</div></div>`;
+    const type = s.conf ? '🔒 ' : '';
+    return `<div class="server-item${on}" onclick="sel(${i})"><div class="server-flag">${s.f}</div><div class="server-info"><div class="server-name">${type}${s.n}</div><div class="server-addr">${s.e}</div></div><div class="server-ping ${pc}">${pt}</div></div>`;
   }).join('');
 }
 
 function sel(i){
   active=i;save();render();toggleServers();
   if(connected){toast('🔄 Переподключение...');toggleConnect();setTimeout(toggleConnect,800);}
-  else{document.getElementById('statusSub').textContent=servers[active].n+' • '+servers[active].e;toast('📍 '+servers[active].n);}
+  else{document.getElementById('statusSub').textContent=servers[active].n;toast('📍 '+servers[active].n);}
 }
 
 function toggleServers(){document.getElementById('serverPanel').classList.toggle('on');}
+
+function importConf(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const text=e.target.result;
+    const lines=text.split('\n');
+    let name=file.name.replace('.conf','');
+    let endpoint='';let flag='🔒';
+    for(const line of lines){
+      if(line.startsWith('#Name='))name=line.split('=')[1];
+      if(line.startsWith('Endpoint='))endpoint=line.split('=')[1];
+    }
+    if(!endpoint){toast('❌ Неверный .conf');return;}
+    servers.push({n:name,e:endpoint,f:flag,p:0,conf:text});
+    save();render();toast('✅ Импортирован: '+name);
+  };
+  reader.readAsText(file);
+  input.value='';
+}
 
 async function pingAll(){
   for(let i=0;i<servers.length;i++){
@@ -133,7 +161,6 @@ async function pingAll(){
         const res=await window.Capacitor.Plugins.CvetikVpn.ping({host:servers[i].e.split(':')[0]});
         servers[i].p=res.ms||999;
       }else{
-        // Fallback for web
         const t0=Date.now();
         try{await fetch('http://'+servers[i].e.split(':')[0],{mode:'no-cors',signal:AbortSignal.timeout(3000)});}catch(e){}
         servers[i].p=Date.now()-t0;
@@ -151,24 +178,24 @@ async function toggleConnect(){
     toast('⏳ Запрос разрешения VPN...');
     try{
       if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
-        const res=await window.Capacitor.Plugins.CvetikVpn.connect({endpoint:s.e,name:s.n});
+        const res=await window.Capacitor.Plugins.CvetikVpn.connect({endpoint:s.e,name:s.n,conf:s.conf||""});
         if(res.status==='connected'){
           connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';
-          dot.classList.add('on');title.textContent='Подключено';sub.textContent=s.n+' • '+s.e;
+          dot.classList.add('on');title.textContent='Подключено';sub.textContent=s.n;
           stats.classList.add('on');startReal();toast('✅ '+s.n);
-        }else if(res.status==='permission_required'){
-          toast('🔒 Разрешите VPN в настройках');
+        }else if(res.status==='permission_denied'){
+          toast('🔒 Нажмите ОК в системном диалоге VPN');
         }else{toast('❌ '+ (res.error||'err'));}
       }else{
         connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';
-        dot.classList.add('on');title.textContent='Демо';sub.textContent=s.n+' • '+s.e;
+        dot.classList.add('on');title.textContent='Демо';sub.textContent=s.n;
         stats.classList.add('on');startSim();toast('✅ Демо: '+s.n);
       }
     }catch(e){toast('❌ '+e.message);}
   }else{
     try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn)await window.Capacitor.Plugins.CvetikVpn.disconnect();}catch(e){}
     connected=false;btn.classList.remove('on');icon.textContent='⚡';label.textContent='ВКЛ';
-    dot.classList.remove('on');title.textContent='Отключено';sub.textContent='Выберите сервер';
+    dot.classList.remove('on');title.textContent='Отключено';sub.textContent='Выберите туннель';
     stats.classList.remove('on');stopSim();stopReal();toast('❌ Отключено');
   }
 }
@@ -181,10 +208,10 @@ function stopReal(){if(realI){clearInterval(realI);realI=null;}}
 function fmt(b){if(!b||b<0)return'0.0';const m=b/(1024*1024);if(m<1)return(b/1024).toFixed(1)+' КБ';return m.toFixed(1)+' МБ';}
 
 let toastT;
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2500);}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),3000);}
 
 render();
-document.getElementById('statusSub').textContent=servers[active]?servers[active].n+' • '+servers[active].e:'Выберите сервер';
+document.getElementById('statusSub').textContent=servers[active]?servers[active].n:'Выберите туннель';
 pingAll();
 </script>
 </body>
