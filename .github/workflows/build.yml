@@ -16,6 +16,8 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - run: npm ci
+    - run: npx cap telemetry off
+    - run: npx cap add android
     - run: npx cap sync android
     - run: |
         cd android
