@@ -616,6 +616,24 @@ function startRealStats(){
 }
 function stopRealStats(){if(statsInterval){clearInterval(statsInterval);statsInterval=null;}}
 function fmtB(b){if(!b||b<0)return'0.0';const mb=b/(1024*1024);if(mb<1)return(b/1024).toFixed(1)+' КБ';return mb.toFixed(1)+' МБ';}
+
+// === REAL STATS ===
+let statsInterval=null;
+function startRealStats(){
+  if(statsInterval)clearInterval(statsInterval);
+  statsInterval=setInterval(async()=>{
+    try{
+      if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.CvetikVpn){
+        const res=await window.Capacitor.Plugins.CvetikVpn.getStats();
+        document.getElementById('down').textContent=fmtB(res.rx);
+        document.getElementById('up').textContent=fmtB(res.tx);
+        document.getElementById('ping').textContent=(configs[active].p||'--')+' мс';
+      }
+    }catch(e){}
+  },1000);
+}
+function stopRealStats(){if(statsInterval){clearInterval(statsInterval);statsInterval=null;}}
+function fmtB(b){if(!b||b<0)return'0.0';const mb=b/(1024*1024);if(mb<1)return(b/1024).toFixed(1)+' КБ';return mb.toFixed(1)+' МБ';}
 init();
 </script>
 </body>
