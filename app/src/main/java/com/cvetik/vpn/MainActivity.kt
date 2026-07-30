@@ -3,6 +3,7 @@ package com.cvetik.vpn
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
+import android.util.Log
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -44,12 +45,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onVpnPermissionGranted() {
-        val intent = Intent(this, CvetikVpnService::class.java)
-        intent.action = CvetikVpnService.ACTION_CONNECT
-        intent.putExtra("endpoint", pendingEndpoint)
-        intent.putExtra("name", pendingName)
-        startService(intent)
-        webView.evaluateJavascript("onVpnConnected()", null)
+        try {
+            val intent = Intent(this, CvetikVpnService::class.java)
+            intent.action = CvetikVpnService.ACTION_CONNECT
+            intent.putExtra("endpoint", pendingEndpoint)
+            intent.putExtra("name", pendingName)
+            startService(intent)
+            webView.evaluateJavascript("onVpnConnected()", null)
+        } catch (e: Exception) {
+            Log.e("CVETIK", "Failed to start VPN: ${e.message}")
+            webView.evaluateJavascript("onVpnError('${e.message?.replace("'", "\'")}')", null)
+        }
     }
 
     private fun onVpnPermissionDenied() {

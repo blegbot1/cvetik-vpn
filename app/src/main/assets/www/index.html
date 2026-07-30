@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CVETIK-VPN</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
 .header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#161b22;border-bottom:1px solid #30363d}
@@ -53,12 +53,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .stat-val{font-size:16px;font-weight:800;background:linear-gradient(90deg,#e63946,#457b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .stat-lab{font-size:10px;color:#8b949e;margin-top:2px;text-transform:uppercase}
 
-.import-btn{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#457b9d;border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(69,123,157,0.4);z-index:50;display:flex;align-items:center;justify-content:center}
-.import-btn:active{transform:scale(0.9)}
-#confInput{display:none}
-
 .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(60px);background:#161b22;border:1px solid #30363d;padding:12px 24px;border-radius:24px;font-size:14px;z-index:300;opacity:0;transition:all 0.4s;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.log-box{position:fixed;top:56px;left:0;right:0;background:rgba(13,17,23,0.95);border-bottom:1px solid #30363d;padding:8px 16px;font-size:11px;color:#8b949e;max-height:80px;overflow-y:auto;z-index:90;display:none}
+.log-box.on{display:block}
 </style>
 </head>
 <body>
@@ -96,8 +95,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
-<button class="import-btn" onclick="document.getElementById('confInput').click()" title="Импорт .conf">📁</button>
-<input type="file" id="confInput" accept=".conf" onchange="importConf(this)">
+<div class="log-box" id="logBox"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -132,40 +130,34 @@ function sel(i){
 
 function toggleServers(){document.getElementById('serverPanel').classList.toggle('on');}
 
-function importConf(input){
-  const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    const text=e.target.result;
-    let name=file.name.replace('.conf','');
-    let endpoint='';
-    for(const line of text.split('\n')){
-      if(line.startsWith('#Name='))name=line.split('=')[1];
-      if(line.startsWith('Endpoint='))endpoint=line.split('=')[1];
+function log(msg){
+  const box=document.getElementById('logBox');
+  box.classList.add('on');
+  box.innerHTML+='<div>'+new Date().toLocaleTimeString()+' '+msg+'</div>';
+  box.scrollTop=box.scrollHeight;
+}
+
+async function pingOne(i){
+  try{
+    if(window.AndroidVpn){
+      const res=JSON.parse(window.AndroidVpn.ping(servers[i].e.split(':')[0]));
+      servers[i].p=res.ms||999;
+    }else{
+      const t0=Date.now();
+      try{await fetch('http://'+servers[i].e.split(':')[0],{mode:'no-cors',signal:AbortSignal.timeout(3000)});}catch(e){}
+      servers[i].p=Date.now()-t0;
     }
-    if(!endpoint){toast('❌ Неверный .conf');return;}
-    servers.push({n:name,e:endpoint,f:'🔒',p:0});
-    save();render();toast('✅ Импортирован: '+name);
-  };
-  reader.readAsText(file);
-  input.value='';
+  }catch(e){servers[i].p=999;}
+  render();
 }
 
 async function pingAll(){
-  for(let i=0;i<servers.length;i++){
-    servers[i].p=0;render();
-    try{
-      if(window.AndroidVpn){
-        const res=JSON.parse(window.AndroidVpn.ping(servers[i].e.split(':')[0]));
-        servers[i].p=res.ms||999;
-      }else{
-        const t0=Date.now();
-        try{await fetch('http://'+servers[i].e.split(':')[0],{mode:'no-cors',signal:AbortSignal.timeout(3000)});}catch(e){}
-        servers[i].p=Date.now()-t0;
-      }
-    }catch(e){servers[i].p=999;}
-    render();
-  }
+  for(let i=0;i<servers.length;i++)await pingOne(i);
+}
+
+function startPingLoop(){
+  setInterval(()=>{if(!connected)pingOne(active);},1000);
+  setInterval(()=>{pingAll();},30000);
 }
 
 function toggleConnect(){
@@ -175,28 +167,27 @@ function toggleConnect(){
   if(!connected){
     if(!window.AndroidVpn){toast('❌ Нет нативного моста');return;}
     toast('⏳ Запрос разрешения VPN...');
+    log('Запрос VPN: '+s.e);
     window.AndroidVpn.requestVpnPermission(s.e, s.n);
   }else{
     window.AndroidVpn.disconnect();
     connected=false;btn.classList.remove('on');icon.textContent='⚡';label.textContent='ВКЛ';
     dot.classList.remove('on');title.textContent='Отключено';sub.textContent='Выберите туннель';
-    stats.classList.remove('on');stopSim();stopReal();toast('❌ Отключено');
+    stats.classList.remove('on');stopSim();stopReal();toast('❌ Отключено');log('Отключено');
   }
 }
 
-// Called from Android when VPN permission granted
 function onVpnConnected(){
   const btn=document.getElementById('connectBtn'),icon=document.getElementById('connectIcon'),label=document.getElementById('connectLabel');
   const dot=document.getElementById('statusDot'),title=document.getElementById('statusTitle'),sub=document.getElementById('statusSub');
   const stats=document.getElementById('stats');const s=servers[active];
   connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';
   dot.classList.add('on');title.textContent='Подключено';sub.textContent=s.n;
-  stats.classList.add('on');startReal();toast('✅ '+s.n);
+  stats.classList.add('on');startReal();toast('✅ '+s.n);log('Подключено к '+s.e);
 }
 
-function onVpnDenied(){
-  toast('🔒 Нажмите ОК в системном диалоге VPN');
-}
+function onVpnDenied(){toast('🔒 Нажмите ОК в диалоге VPN');log('Разрешение отклонено');}
+function onVpnError(msg){toast('❌ '+msg);log('Ошибка: '+msg);}
 
 let simI,realI;
 function startSim(){if(simI)clearInterval(simI);simI=setInterval(()=>{document.getElementById('downVal').textContent=(Math.random()*5+0.5).toFixed(1)+' МБ';document.getElementById('upVal').textContent=(Math.random()*2+0.1).toFixed(1)+' МБ';document.getElementById('pingVal').textContent=servers[active].p+' мс';},1000);}
@@ -211,6 +202,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 render();
 document.getElementById('statusSub').textContent=servers[active]?servers[active].n:'Выберите туннель';
 pingAll();
+startPingLoop();
 </script>
 </body>
 </html>
