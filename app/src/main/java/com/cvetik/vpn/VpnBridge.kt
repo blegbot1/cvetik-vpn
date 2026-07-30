@@ -6,9 +6,9 @@ import android.webkit.JavascriptInterface
 class VpnBridge(private val activity: MainActivity) {
 
     @JavascriptInterface
-    fun requestVpnPermission(endpoint: String, name: String) {
+    fun requestVpnPermission(config: String, name: String) {
         activity.runOnUiThread {
-            activity.requestVpnPermission(endpoint, name)
+            activity.requestVpnPermission(config, name)
         }
     }
 

@@ -3,7 +3,6 @@ package com.cvetik.vpn
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
-import android.util.Log
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -12,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
-    private var pendingEndpoint = ""
+    private var pendingConfig = ""
     private var pendingName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +32,8 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("file:///android_asset/www/index.html")
     }
 
-    fun requestVpnPermission(endpoint: String, name: String) {
-        pendingEndpoint = endpoint
+    fun requestVpnPermission(config: String, name: String) {
+        pendingConfig = config
         pendingName = name
         val intent = VpnService.prepare(this)
         if (intent != null) {
@@ -45,17 +44,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onVpnPermissionGranted() {
-        try {
-            val intent = Intent(this, CvetikVpnService::class.java)
-            intent.action = CvetikVpnService.ACTION_CONNECT
-            intent.putExtra("endpoint", pendingEndpoint)
-            intent.putExtra("name", pendingName)
-            startService(intent)
-            webView.evaluateJavascript("onVpnConnected()", null)
-        } catch (e: Exception) {
-            Log.e("CVETIK", "Failed to start VPN: ${e.message}")
-            webView.evaluateJavascript("onVpnError('${e.message?.replace("'", "\'")}')", null)
-        }
+        val intent = Intent(this, CvetikVpnService::class.java)
+        intent.action = CvetikVpnService.ACTION_CONNECT
+        intent.putExtra("config", pendingConfig)
+        intent.putExtra("name", pendingName)
+        startService(intent)
+        webView.evaluateJavascript("onVpnConnected()", null)
     }
 
     private fun onVpnPermissionDenied() {
