@@ -8,6 +8,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -44,12 +46,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onVpnPermissionGranted() {
-        val intent = Intent(this, CvetikVpnService::class.java)
-        intent.action = CvetikVpnService.ACTION_CONNECT
-        intent.putExtra("config", pendingConfig)
-        intent.putExtra("name", pendingName)
-        startService(intent)
-        webView.evaluateJavascript("onVpnConnected()", null)
+        lifecycleScope.launch {
+            try {
+                val serviceIntent = Intent(this@MainActivity, service.CvetikVpnService::class.java)
+                serviceIntent.action = service.CvetikVpnService.ACTION_CONNECT
+                serviceIntent.putExtra("config", pendingConfig)
+                serviceIntent.putExtra("name", pendingName)
+                startService(serviceIntent)
+                webView.evaluateJavascript("onVpnConnected()", null)
+            } catch (e: Exception) {
+                webView.evaluateJavascript("toast('❌ Ошибка: \${e.message}')", null)
+            }
+        }
     }
 
     private fun onVpnPermissionDenied() {

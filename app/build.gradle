@@ -11,8 +11,8 @@ android {
         applicationId "com.cvetik.vpn"
         minSdk 24
         targetSdk 34
-        versionCode 5
-        versionName "5.0-wgtunnel"
+        versionCode 10
+        versionName "10.0-wgtunnel"
     }
 
     buildTypes {
@@ -28,6 +28,9 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+
+    // For native libraries
+    ndkVersion '25.2.9519653'
 }
 
 dependencies {
@@ -37,9 +40,12 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     implementation 'com.marsounjan:icmp4a:1.2.0'
 
-    // WG Tunnel / WireGuard / AmneziaWG backend
+    // WG Tunnel / WireGuard / AmneziaWG
     implementation 'com.wireguard.android:tunnel:1.0.20230418'
 
-    // For AmneziaWG support - using tunnel library
+    // For AmneziaWG support
     implementation 'com.github.zaneschepke:wgtunnel:3.6.4'
+
+    // Additional for tunnel management
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2'
 }

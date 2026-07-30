@@ -1,28 +1,27 @@
-CVETIK-VPN WG Tunnel Edition
-=============================
+CVETIK-VPN WG Tunnel Fork
+==========================
 
-ПРОЕКТ: Android VPN с WebView UI + WireGuard/AmneziaWG backend.
+PROJECT: Android VPN with WebView UI + WireGuard/AmneziaWG backend.
 
-КОНФИГИ (встроены в index.html):
-- Пермь-1: engage.cloudflareclient.com:4500
-- Пермь-2: engage.cloudflareclient.com:4500
+CONFIGS (embedded in index.html):
+- Perm-1: engage.cloudflareclient.com:4500
+- Perm-2: engage.cloudflareclient.com:4500
 
-ЧТО СДЕЛАНО:
-1. Полный парсер AmneziaWG конфигов
-2. Встроены 2 конфига
-3. VPN интерфейс с маршрутами 0.0.0.0/0
-4. UDP туннель к endpoint
-5. Keepalive пакеты
-6. Логирование (Log.i/Log.e)
-7. Убран ripple, убран FAB
-8. Пинг каждые 5 сек, статистика каждую секунду
+DONE:
+1. Full AmneziaWG config parser
+2. VPN interface with proper routes
+3. UDP tunnel to endpoint
+4. Keepalive packets
+5. Logging
+6. No ripple, no FAB
+7. Auto ping, traffic stats
 
-ЧТО НУЖНО:
-1. ПОЛНОЕ AmneziaWG шифрование — интеграция amneziawg-go
-2. Проверить работу с Cloudflare WARP
-3. Возможно нужен другой endpoint (не engage.cloudflareclient.com)
+TODO:
+1. FULL AmneziaWG encryption - integrate amneziawg-go native library
+2. Test with Cloudflare WARP
+3. Add more servers
 
-КЛЮЧЕВАЯ ПРОБЛЕМА:
-Текущий код = UDP forwarding без Noise протокола.
-Для WARP нужна специальная авторизация.
-Для AmneziaWG сервера нужен настоящий handshake.
+KEY ISSUE:
+Current code = UDP forwarding without Noise protocol.
+For WARP: needs special auth.
+For AmneziaWG server: needs real handshake.

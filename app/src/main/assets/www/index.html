@@ -96,7 +96,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <script>
 let servers = JSON.parse(localStorage.getItem('cvetik_servers')) || [
-  {n:"Пермь-1",c:`[Interface]
+  {n:"Perm-1",c:`[Interface]
 Address = 172.16.0.2/32, 2606:4700:110:8820:25dc:cd3a:4b1e:eea2/128
 DNS = 1.1.1.1, 2606:4700:4700::1111, 1.0.0.1, 2606:4700:4700::1001
 MTU = 1280
@@ -113,7 +113,7 @@ PrivateKey = AAUpyicUZcS4fnCy2kvzVys5EgDoo5uZZdVn+cZjFko=
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = engage.cloudflareclient.com:4500
 PublicKey = bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=`,f:"🇷🇺",p:0},
-  {n:"Пермь-2",c:`[Interface]
+  {n:"Perm-2",c:`[Interface]
 Address = 172.16.0.2/32, 2606:4700:110:8f76:f752:d90e:599f:f619/128
 DNS = 1.1.1.1, 2606:4700:4700::1111, 1.0.0.1, 2606:4700:4700::1001
 MTU = 1280
@@ -149,7 +149,7 @@ function render(){
 
 function sel(i){
   active=i;save();render();toggleServers();
-  if(connected){toast('🔄 Переподключение...');toggleConnect();setTimeout(toggleConnect,800);}
+  if(connected){toast('🔄 Reconnecting...');toggleConnect();setTimeout(toggleConnect,800);}
   else{document.getElementById('statusSub').textContent=servers[active].n;toast('📍 '+servers[active].n);}
 }
 
@@ -196,14 +196,14 @@ function toggleConnect(){
   const dot=document.getElementById('statusDot'),title=document.getElementById('statusTitle'),sub=document.getElementById('statusSub');
   const stats=document.getElementById('stats');const s=servers[active];
   if(!connected){
-    if(!window.AndroidVpn){toast('❌ Нет нативного моста');return;}
-    toast('⏳ Подключение к '+s.n+'...');
+    if(!window.AndroidVpn){toast('❌ Native bridge not found');return;}
+    toast('⏳ Connecting to '+s.n+'...');
     window.AndroidVpn.requestVpnPermission(s.c, s.n);
   }else{
     window.AndroidVpn.disconnect();
-    connected=false;btn.classList.remove('on');icon.textContent='⚡';label.textContent='ВКЛ';
-    dot.classList.remove('on');title.textContent='Отключено';sub.textContent='Выберите туннель';
-    stats.classList.remove('on');stopReal();stopPingLoop();toast('❌ Отключено');
+    connected=false;btn.classList.remove('on');icon.textContent='⚡';label.textContent='ON';
+    dot.classList.remove('on');title.textContent='Disconnected';sub.textContent='Select tunnel';
+    stats.classList.remove('on');stopReal();stopPingLoop();toast('❌ Disconnected');
   }
 }
 
@@ -211,13 +211,13 @@ function onVpnConnected(){
   const btn=document.getElementById('connectBtn'),icon=document.getElementById('connectIcon'),label=document.getElementById('connectLabel');
   const dot=document.getElementById('statusDot'),title=document.getElementById('statusTitle'),sub=document.getElementById('statusSub');
   const stats=document.getElementById('stats');const s=servers[active];
-  connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='ВЫКЛ';
-  dot.classList.add('on');title.textContent='Подключено';sub.textContent=s.n;
+  connected=true;btn.classList.add('on');icon.textContent='✓';label.textContent='OFF';
+  dot.classList.add('on');title.textContent='Connected';sub.textContent=s.n;
   stats.classList.add('on');startReal();startPingLoop();toast('✅ '+s.n);
 }
 
 function onVpnDenied(){
-  toast('🔒 Нажмите ОК в системном диалоге VPN');
+  toast('🔒 Please allow VPN in system dialog');
 }
 
 function startReal(){
@@ -227,18 +227,18 @@ function startReal(){
       const r=JSON.parse(window.AndroidVpn.getStats());
       document.getElementById('downVal').textContent=fmt(r.rx);
       document.getElementById('upVal').textContent=fmt(r.tx);
-      document.getElementById('pingVal').textContent=servers[active].p+' мс';
+      document.getElementById('pingVal').textContent=servers[active].p+' ms';
     }}catch(e){}
   },1000);
 }
 function stopReal(){if(statsInterval){clearInterval(statsInterval);statsInterval=null;}}
-function fmt(b){if(!b||b<0)return'0.0';const m=b/(1024*1024);if(m<1)return(b/1024).toFixed(1)+' КБ';return m.toFixed(1)+' МБ';}
+function fmt(b){if(!b||b<0)return'0.0';const m=b/(1024*1024);if(m<1)return(b/1024).toFixed(1)+' KB';return m.toFixed(1)+' MB';}
 
 let toastT;
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),3000);}
 
 render();
-document.getElementById('statusSub').textContent=servers[active]?servers[active].n:'Выберите туннель';
+document.getElementById('statusSub').textContent=servers[active]?servers[active].n:'Select tunnel';
 pingAll();
 </script>
 </body>

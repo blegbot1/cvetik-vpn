@@ -2,6 +2,8 @@ package com.cvetik.vpn
 
 import android.content.Intent
 import android.webkit.JavascriptInterface
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class VpnBridge(private val activity: MainActivity) {
 
@@ -14,14 +16,14 @@ class VpnBridge(private val activity: MainActivity) {
 
     @JavascriptInterface
     fun disconnect() {
-        val intent = Intent(activity, CvetikVpnService::class.java)
-        intent.action = CvetikVpnService.ACTION_DISCONNECT
+        val intent = Intent(activity, service.CvetikVpnService::class.java)
+        intent.action = service.CvetikVpnService.ACTION_DISCONNECT
         activity.startService(intent)
     }
 
     @JavascriptInterface
     fun getStats(): String {
-        return "{\"rx\":" + CvetikVpnService.totalRx + ",\"tx\":" + CvetikVpnService.totalTx + ",\"connected\":" + CvetikVpnService.isRunning + "}"
+        return "{\"rx\":" + service.CvetikVpnService.totalRx + ",\"tx\":" + service.CvetikVpnService.totalTx + ",\"connected\":" + service.CvetikVpnService.isRunning + "}"
     }
 
     @JavascriptInterface
